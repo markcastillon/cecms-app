@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">CECMS</string>
+    <string name="title_activity_main">CECMS</string>
+    <string name="package_name">ph.edu.carsu.cecms</string>
+    <string name="custom_url_scheme">ph.edu.carsu.cecms</string>
+</resources>
