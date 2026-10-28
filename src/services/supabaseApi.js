@@ -47,7 +47,6 @@ export function createSupabaseApi(url, anonKey) {
   }
 
   return {
-    mode: "supabase",
 
     // ----- Auth -----
     async getSession() {

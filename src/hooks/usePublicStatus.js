@@ -81,5 +81,5 @@ export function usePublicStatus() {
     };
   }, [load]);
 
-  return { ...state, reload: load, mode: api.mode };
+  return { ...state, reload: load };
 }

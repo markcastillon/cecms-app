@@ -1,4 +1,4 @@
-// Writes supabase/seed.sql from the same sample data demo mode uses.
+// Writes supabase/seed.sql from the sample data in src/data/seed.js.
 // Run with: npm run seed
 import fs from "node:fs";
 import {

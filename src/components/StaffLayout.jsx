@@ -14,7 +14,7 @@ import { NavLink, Outlet } from "react-router";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useData } from "../context/DataContext.jsx";
 import { Brand } from "./Brand.jsx";
-import { DemoBadge, OfflineBanner, Spinner } from "./ui.jsx";
+import { OfflineBanner, Spinner } from "./ui.jsx";
 
 const NAV = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, end: true, mobile: true },
@@ -32,8 +32,8 @@ const linkClass = ({ isActive }) =>
   }`;
 
 export function StaffLayout() {
-  const { user, signOut, mode } = useAuth();
-  const { status, error, refresh, actions } = useData();
+  const { user, signOut } = useAuth();
+  const { status, error, refresh } = useData();
 
   return (
     <div className="min-h-svh lg:grid lg:grid-cols-[250px_1fr]">
@@ -68,12 +68,6 @@ export function StaffLayout() {
           </div>
           <div className="hidden text-sm text-muted lg:block">Community Evacuation Center Management System</div>
           <div className="flex items-center gap-2">
-            <DemoBadge mode={mode} />
-            {mode === "demo" && actions.resetDemo && (
-              <button className="btn-ghost hidden px-3 py-1.5 text-xs sm:inline-flex" onClick={() => actions.resetDemo()} title="Put the sample data back">
-                Reset demo
-              </button>
-            )}
             <button className="btn-ghost p-2" onClick={refresh} aria-label="Refresh data">
               <RefreshCw size={16} aria-hidden="true" />
             </button>

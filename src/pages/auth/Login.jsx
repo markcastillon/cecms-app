@@ -2,15 +2,14 @@ import { useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { Field } from "../../components/ui.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
-import { DEMO_ACCOUNT } from "../../services/demoApi.js";
 import { AuthShell, FormMessage } from "./AuthShell.jsx";
 
 export default function Login() {
-  const { user, signIn, mode } = useAuth();
+  const { user, signIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [email, setEmail] = useState(mode === "demo" ? DEMO_ACCOUNT.email : "");
-  const [password, setPassword] = useState(mode === "demo" ? DEMO_ACCOUNT.password : "");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -39,11 +38,6 @@ export default function Login() {
         </>
       }
     >
-      {mode === "demo" && (
-        <p className="mb-4 rounded-xl bg-accent-soft px-3 py-2 text-xs text-ink">
-          <strong>Demo mode:</strong> the demo account is filled in for you. Data is saved only in this browser.
-        </p>
-      )}
       <form className="space-y-4" onSubmit={onSubmit}>
         <Field label="Email" htmlFor="email">
           <input id="email" className="input" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />

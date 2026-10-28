@@ -1,10 +1,10 @@
-// Sample data for demo mode and for supabase/seed.sql (npm run seed).
+// Sample data for supabase/seed.sql (npm run seed).
 // Centers, announcements, supplies and policies come from the CSC 106 system.
 // Families and evacuees are generated with a fixed random seed so every run
 // produces the same people. All names are fictional.
 //
 // Times are stored as "minutes ago" so the data always looks recent:
-// demo mode converts them to dates on first load, and the SQL seed uses now() - interval.
+// the SQL seed turns them into now() - interval.
 
 export const SEED_CENTERS = [
   { id: "EC-01", name: "Pangabugan Elementary School", location: "Purok 3, Brgy. Pangabugan", capacity: 250, statusOverride: "", contactPerson: "Center Coordinator A", contactNumber: "" },

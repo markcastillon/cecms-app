@@ -32,7 +32,6 @@ export function AuthProvider({ children }) {
       user,
       loading,
       recovering,
-      mode: api.mode,
       signIn: api.signIn,
       signUp: api.signUp,
       signOut: api.signOut,

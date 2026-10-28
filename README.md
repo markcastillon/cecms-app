@@ -13,8 +13,9 @@ React app with login, a staff dashboard, data analytics and an Android build.
   breakdown, vulnerable groups, a forecast of when each center will be full, a recommendation of
   where to send new arrivals, and days of food left per center.
 
-It runs right away in **demo mode** (sample data saved in your browser). Connect Supabase to make
-it a real multi-user system.
+All data is stored in Supabase, so every staff member sees the same live records.
+
+**Live site:** https://cecms-app-black.vercel.app
 
 ---
 
@@ -34,20 +35,24 @@ it a real multi-user system.
 
 ## Run it on your computer
 
-Install Node.js 20 or newer, open a terminal in this folder, then:
+Install Node.js 20 or newer and Git, then:
 
 ```bash
+git clone https://github.com/markcastillon/cecms-app.git
+cd cecms-app
 npm install
+```
+
+Create a `.env` file with the Supabase keys (ask the team, or see the next section), then:
+
+```bash
 npm run dev
 ```
 
-Open the address it prints (usually http://localhost:5173).
+Open the address it prints (usually http://localhost:5173). Without the keys the app shows a
+"Supabase is not set up" message.
 
-- Click **Staff login**. In demo mode the demo account is filled in for you:
-  `coordinator@demo.ph` / `demo1234`.
-- **Reset demo** (top right of the staff area) puts the sample data back.
-
-## Connect Supabase (real backend)
+## Connect Supabase (backend)
 
 1. Create a free project at https://supabase.com.
 2. Open **SQL Editor**, paste all of `supabase/schema.sql`, and click **Run**.
@@ -57,7 +62,7 @@ Open the address it prints (usually http://localhost:5173).
    VITE_SUPABASE_URL=your Project URL
    VITE_SUPABASE_ANON_KEY=your anon public key
    ```
-5. Restart `npm run dev`. The "Demo data" badge disappears.
+5. Restart `npm run dev`.
 6. Register an account in the app, then approve it: **Table Editor > staff**, set `approved` to
    `true` for your row. New accounts cannot see evacuee data until approved.
 7. For password-reset emails, add your site address under
@@ -91,14 +96,14 @@ src/
   analytics/pipeline.js   Data pipeline: clean, aggregate, forecast (emerging tech)
   components/             Shared UI: layout, status pill, meter, cards
   context/                AuthContext (session) and DataContext (app state)
-  data/seed.js            Sample data for demo mode and seed.sql
+  data/seed.js            Sample data used to generate seed.sql
   hooks/                  usePublicStatus (offline cache), useNetwork (Capacitor)
   lib/status.js           Center status rules (same as the CSC 106 system)
   pages/public/           Public page and volunteer form
   pages/auth/             Login, register, reset and update password
   pages/staff/            Dashboard, evacuees, register family, centers,
                           announcements, supplies, volunteers, analytics
-  services/               api.js picks Supabase or demo; mappers convert rows
+  services/               api.js connects to Supabase; mappers convert rows
 supabase/
   schema.sql              Tables, Row Level Security, public summary function
   seed.sql                Sample data (generated)

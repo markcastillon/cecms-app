@@ -125,15 +125,6 @@ export function OfflineBanner() {
   );
 }
 
-export function DemoBadge({ mode }) {
-  if (mode !== "demo") return null;
-  return (
-    <span className="rounded-full bg-accent-soft px-2.5 py-1 text-xs font-bold whitespace-nowrap text-accent" title="No Supabase keys set: sample data stored in this browser">
-      Demo data
-    </span>
-  );
-}
-
 export function EmptyState({ children }) {
   return <p className="rounded-2xl border border-dashed border-line p-8 text-center text-sm text-muted">{children}</p>;
 }

@@ -5,7 +5,7 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import { AuthShell, FormMessage } from "./AuthShell.jsx";
 
 export default function ResetPassword() {
-  const { requestPasswordReset, mode } = useAuth();
+  const { requestPasswordReset } = useAuth();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -17,11 +17,7 @@ export default function ResetPassword() {
     setBusy(true);
     try {
       await requestPasswordReset(email.trim());
-      setSuccess(
-        mode === "demo"
-          ? "Demo mode can't send email. With Supabase connected, a reset link is sent to this address."
-          : "If that email has an account, a reset link is on its way. Check your inbox."
-      );
+      setSuccess("If that email has an account, a reset link is on its way. Check your inbox.");
     } catch (err) {
       setError(err.message);
     } finally {

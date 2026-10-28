@@ -4,7 +4,7 @@ import { AlertTriangle, LogIn, Phone, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { Brand } from "../../components/Brand.jsx";
-import { AnnouncementCard, DemoBadge, EmptyState, Meter, OfflineBanner, Spinner, StatusPill } from "../../components/ui.jsx";
+import { AnnouncementCard, EmptyState, Meter, OfflineBanner, Spinner, StatusPill } from "../../components/ui.jsx";
 import { BARANGAY, CITY, STATUSES } from "../../config.js";
 import { usePublicStatus } from "../../hooks/usePublicStatus.js";
 import { fmt, timeAgo } from "../../lib/status.js";
@@ -72,7 +72,7 @@ function PolicyCard({ p }) {
 }
 
 export default function Home() {
-  const { status, offline, data, mode } = usePublicStatus();
+  const { status, offline, data } = usePublicStatus();
   const [filter, setFilter] = useState("all");
   const [query, setQuery] = useState("");
 
@@ -138,10 +138,8 @@ export default function Home() {
           <aside className="card self-center" aria-labelledby="board-title">
             <div className="flex items-center justify-between gap-2">
               <h2 id="board-title" className="font-bold">Live situation board</h2>
-              {offline ? (
+              {offline && (
                 <span className="rounded-full bg-nearly/15 px-2.5 py-1 text-xs font-bold text-nearly">Offline copy</span>
-              ) : (
-                <DemoBadge mode={mode} />
               )}
             </div>
             <dl className="mt-4 grid grid-cols-2 gap-3">

@@ -5,7 +5,7 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import { AuthShell, FormMessage } from "./AuthShell.jsx";
 
 export default function Register() {
-  const { user, signUp, mode } = useAuth();
+  const { user, signUp } = useAuth();
   const navigate = useNavigate();
   const [values, setValues] = useState({ fullName: "", email: "", password: "", confirm: "" });
   const [error, setError] = useState("");
@@ -41,11 +41,7 @@ export default function Register() {
   return (
     <AuthShell
       title="Create a staff account"
-      subtitle={
-        mode === "demo"
-          ? "Demo mode: accounts are stored in this browser only."
-          : "New accounts can see evacuee records only after an administrator approves them."
-      }
+      subtitle="New accounts can see evacuee records only after an administrator approves them."
       footer={
         <>
           Already registered? <Link to="/login" className="font-semibold text-link hover:underline">Log in</Link>

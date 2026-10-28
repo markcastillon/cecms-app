@@ -87,7 +87,6 @@ export function DataProvider({ children }) {
         addSupply: withRefresh(api.addSupply),
         adjustSupply: withRefresh(api.adjustSupply),
         setVolunteerStatus: withRefresh(api.setVolunteerStatus),
-        resetDemo: api.resetDemo ? withRefresh(async () => api.resetDemo()) : null,
       },
     };
   }, [state, refresh, withRefresh]);
