@@ -16,6 +16,8 @@ function CenterEditor({ center, onSave }) {
 
   async function save(e) {
     e.preventDefault();
+    // An empty box would become 0, which silently marks the center Closed.
+    if (String(values.capacity).trim() === "") return setError("Enter the capacity (0 closes the center).");
     const capacity = Number(values.capacity);
     if (!Number.isInteger(capacity) || capacity < 0) return setError("Capacity must be a whole number.");
     setBusy(true);
