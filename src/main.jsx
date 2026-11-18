@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
+import { startPwa } from "./pwa.js";
 import { missingConfig } from "./services/api.js";
 import "./index.css";
 
@@ -21,3 +22,5 @@ function SetupNotice() {
 createRoot(document.getElementById("root")).render(
   <StrictMode>{missingConfig ? <SetupNotice /> : <App />}</StrictMode>
 );
+
+startPwa();
