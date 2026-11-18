@@ -8,14 +8,19 @@ import { formatDateTime } from "../../lib/status.js";
 
 const PAGE_SIZE = 25;
 
-function FamilyRow({ family, members, centerName, onStatus }) {
+function FamilyRow({ family, members, centerName, centerStatus, onStatus }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const sheltered = family.status === "Sheltered";
 
   async function toggleStatus() {
     const next = sheltered ? "Returned home" : "Sheltered";
-    if (!window.confirm(`Mark the ${family.headOfFamily} family (${members.length} people) as "${next}"?`)) return;
+    // Moving a family back in: warn if their center no longer takes new arrivals.
+    const warning =
+      next === "Sheltered" && (centerStatus === "Full" || centerStatus === "Closed")
+        ? `\n\nNote: ${centerName(family.centerId)} is ${centerStatus}. If they are at a different center, register them there instead.`
+        : "";
+    if (!window.confirm(`Mark the ${family.headOfFamily} family (${members.length} people) as "${next}"?${warning}`)) return;
     setBusy(true);
     try {
       await onStatus(family.id, next);
@@ -135,7 +140,7 @@ export default function Evacuees() {
       ) : (
         <ul className="space-y-3">
           {list.slice(0, shown).map((f) => (
-            <FamilyRow key={f.id} family={f} members={membersByFamily[f.id] ?? []} centerName={centerName} onStatus={actions.setFamilyStatus} />
+            <FamilyRow key={f.id} family={f} members={membersByFamily[f.id] ?? []} centerName={centerName} centerStatus={centers.find((c) => c.id === f.centerId)?.status} onStatus={actions.setFamilyStatus} />
           ))}
         </ul>
       )}
