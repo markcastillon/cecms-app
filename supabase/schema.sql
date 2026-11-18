@@ -209,3 +209,61 @@ begin
     end if;
   end loop;
 end $$;
+
+-- ---------------------------------------------------------------------------
+-- Data safety rules (added Nov 2026). Safe to run again on an existing project.
+-- ---------------------------------------------------------------------------
+
+-- Functions only the database itself calls go in a schema the website API can't reach.
+create schema if not exists private;
+
+-- Volunteer form spam protection (the CSC 106 /api/volunteer endpoint had a rate limit).
+-- Applies only to sign-ups from the website, not to rows added in the SQL Editor (seed.sql).
+--   * The sign-up time and status are always set here, so a visitor can't fake them.
+--   * The same mobile number again within a day is skipped quietly: no duplicate row,
+--     and the form can't be used to find out whether a number already signed up.
+--   * More than 30 sign-ups from everyone in 10 minutes are refused with a message.
+create or replace function private.limit_volunteer_signups()
+returns trigger language plpgsql security definer set search_path = '' as $$
+begin
+  if coalesce(nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'role', '')
+     not in ('anon', 'authenticated') then
+    return new;
+  end if;
+
+  new.submitted_at := now();
+  new.status := 'Pending review';
+
+  if exists (
+    select 1 from public.volunteers
+    where contact_number = new.contact_number and submitted_at > now() - interval '1 day'
+  ) then
+    return null;
+  end if;
+
+  if (select count(*) from public.volunteers where submitted_at > now() - interval '10 minutes') >= 30 then
+    raise exception 'Too many sign-ups right now. Please try again in a few minutes.' using errcode = 'P0001';
+  end if;
+
+  return new;
+end;
+$$;
+revoke all on function private.limit_volunteer_signups() from public;
+
+drop trigger if exists limit_volunteer_signups on public.volunteers;
+create trigger limit_volunteer_signups
+  before insert on public.volunteers
+  for each row execute function private.limit_volunteer_signups();
+
+create index if not exists volunteers_contact_submitted on public.volunteers (contact_number, submitted_at);
+create index if not exists volunteers_submitted on public.volunteers (submitted_at);
+
+-- Supplies: never release more than was received. "not valid" checks every new or
+-- changed row without failing on rows that were saved before this rule existed.
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'supplies_released_within_received') then
+    alter table public.supplies
+      add constraint supplies_released_within_received check (quantity_released <= quantity_received) not valid;
+  end if;
+end $$;
