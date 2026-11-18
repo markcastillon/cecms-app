@@ -51,7 +51,8 @@ export function arrivalsOverTime(evacuees, { bucketHours = 3, now = Date.now() }
   return buckets.map((b) => {
     total += b.arrivals;
     return {
-      label: new Date(b.t).toLocaleString("en-PH", { weekday: "short", hour: "numeric" }),
+      // Include the date: with only the weekday, blocks a week apart get the same label.
+      label: new Date(b.t).toLocaleString("en-PH", { month: "short", day: "numeric", hour: "numeric" }),
       arrivals: b.arrivals,
       cumulative: total,
     };
