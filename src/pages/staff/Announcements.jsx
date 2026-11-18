@@ -29,7 +29,19 @@ export default function Announcements() {
     }
   }
 
-  const toggle = (a) => actions.setAnnouncementActive(a.id, !a.active).catch((err) => window.alert(err.message));
+  // One change at a time per announcement, so a double-click doesn't hide and
+  // then show it again.
+  const [togglingId, setTogglingId] = useState(null);
+  async function toggle(a) {
+    setTogglingId(a.id);
+    try {
+      await actions.setAnnouncementActive(a.id, !a.active);
+    } catch (err) {
+      window.alert(err.message);
+    } finally {
+      setTogglingId(null);
+    }
+  }
 
   return (
     <>
@@ -59,7 +71,7 @@ export default function Announcements() {
             <div className="space-y-3">
               {active.map((a) => (
                 <AnnouncementCard key={a.id} a={a}>
-                  <button className="btn-ghost mt-3 px-3 py-1.5 text-xs" onClick={() => toggle(a)}>Hide from public</button>
+                  <button className="btn-ghost mt-3 px-3 py-1.5 text-xs" onClick={() => toggle(a)} disabled={togglingId === a.id}>Hide from public</button>
                 </AnnouncementCard>
               ))}
               {active.length === 0 && <EmptyState>No active announcements.</EmptyState>}
@@ -71,7 +83,7 @@ export default function Announcements() {
               <div className="space-y-3 opacity-70">
                 {hidden.map((a) => (
                   <AnnouncementCard key={a.id} a={a}>
-                    <button className="btn-ghost mt-3 px-3 py-1.5 text-xs" onClick={() => toggle(a)}>Show again</button>
+                    <button className="btn-ghost mt-3 px-3 py-1.5 text-xs" onClick={() => toggle(a)} disabled={togglingId === a.id}>Show again</button>
                   </AnnouncementCard>
                 ))}
               </div>
