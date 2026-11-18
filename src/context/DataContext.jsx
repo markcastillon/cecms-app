@@ -60,12 +60,15 @@ export function DataProvider({ children }) {
   }, [refresh]);
 
   // Wraps a change so the data reloads afterwards, even without Realtime.
+  // Reloads after a failed change too, so the screen shows what was really saved.
   const withRefresh = useCallback(
     (fn) =>
       async (...args) => {
-        const result = await fn(...args);
-        await refresh();
-        return result;
+        try {
+          return await fn(...args);
+        } finally {
+          await refresh();
+        }
       },
     [refresh]
   );
