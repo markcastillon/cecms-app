@@ -6,9 +6,10 @@ import { Field, PageHeader } from "../../components/ui.jsx";
 import { HOUSE_DAMAGE, RELATIONSHIPS, VULNERABLE_GROUPS } from "../../config.js";
 import { useData } from "../../context/DataContext.jsx";
 import { capacityForecast, recommendCenter } from "../../analytics/pipeline.js";
+import { randomId } from "../../lib/id.js";
 import { fmt } from "../../lib/status.js";
 
-const newMember = (relationship = "Child") => ({ key: crypto.randomUUID(), fullName: "", age: "", sex: "", relationship, vulnerableGroup: "" });
+const newMember = (relationship = "Child") => ({ key: randomId(), fullName: "", age: "", sex: "", relationship, vulnerableGroup: "" });
 
 // Suggests a vulnerable group from age, so staff only fill it in for other cases.
 function suggestedGroup(age) {
@@ -26,11 +27,13 @@ export function validateFamily(family, members) {
   if (family.contactNumber && !/^(09|\+639)\d{9}$/.test(family.contactNumber.replace(/[\s-]/g, ""))) {
     errors.contactNumber = "Use a PH mobile number, e.g. 09171234567.";
   }
-  members.forEach((m, i) => {
+  // Errors are keyed by each member's own key, not their position, so removing
+  // a member doesn't move an error message onto the person below.
+  members.forEach((m) => {
     const age = Number(m.age);
-    if (m.fullName.trim().length < 2) errors[`m${i}.fullName`] = "Name required";
-    if (m.age === "" || !Number.isInteger(age) || age < 0 || age > 120) errors[`m${i}.age`] = "0 to 120";
-    if (!m.sex) errors[`m${i}.sex`] = "Required";
+    if (m.fullName.trim().length < 2) errors[`${m.key}.fullName`] = "Name required";
+    if (m.age === "" || !Number.isInteger(age) || age < 0 || age > 120) errors[`${m.key}.age`] = "0 to 120";
+    if (!m.sex) errors[`${m.key}.sex`] = "Required";
   });
   return errors;
 }
@@ -154,13 +157,13 @@ export default function RegisterFamily() {
           {members.map((m, i) => (
             <fieldset key={m.key} className="grid gap-3 rounded-xl border border-line p-3 sm:grid-cols-[2fr_80px_90px_1fr_1.2fr_auto] sm:items-end">
               <legend className="sr-only">Member {i + 1}</legend>
-              <Field label="Full name" error={errors[`m${i}.fullName`]} htmlFor={`n${i}`}>
+              <Field label="Full name" error={errors[`${m.key}.fullName`]} htmlFor={`n${i}`}>
                 <input id={`n${i}`} className="input" value={m.fullName} onChange={setM(i, "fullName")} readOnly={i === 0} title={i === 0 ? "Same as head of family" : undefined} />
               </Field>
-              <Field label="Age" error={errors[`m${i}.age`]} htmlFor={`a${i}`}>
+              <Field label="Age" error={errors[`${m.key}.age`]} htmlFor={`a${i}`}>
                 <input id={`a${i}`} className="input" type="number" inputMode="numeric" min={0} max={120} value={m.age} onChange={setM(i, "age")} />
               </Field>
-              <Field label="Sex" error={errors[`m${i}.sex`]} htmlFor={`s${i}`}>
+              <Field label="Sex" error={errors[`${m.key}.sex`]} htmlFor={`s${i}`}>
                 <select id={`s${i}`} className="input" value={m.sex} onChange={setM(i, "sex")}>
                   <option value="">-</option>
                   <option value="M">M</option>
