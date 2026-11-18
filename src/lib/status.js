@@ -40,7 +40,9 @@ export function summarize(centers) {
   return {
     totalCenters: centers.length,
     openCenters: centers.filter((c) => c.status === "Open" || c.status === "Nearly Full").length,
-    evacuees: active.reduce((sum, c) => sum + c.occupancy, 0),
+    // Everyone still sheltered counts, even in a center closed to new arrivals;
+    // otherwise closing a center would make its evacuees vanish from the total.
+    evacuees: centers.reduce((sum, c) => sum + c.occupancy, 0),
     availableSpaces: active.filter((c) => c.status !== "Full").reduce((sum, c) => sum + c.available, 0),
   };
 }
