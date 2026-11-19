@@ -95,6 +95,9 @@ tablets with an up-to-date Chrome, and current Chrome, Edge, Safari or Firefox o
 
 ### Install it like an app, from the website (no app store)
 
+Tap **Install the app** on the home page. On Android and computers it opens the browser's install
+box; on iPhone it shows the steps below. (The button is hidden once the app is installed.)
+
 | Device | How |
 |---|---|
 | iPhone / iPad | Open the site in **Safari** > **Share** > **Add to Home Screen** |
