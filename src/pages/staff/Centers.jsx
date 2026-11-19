@@ -1,97 +1,103 @@
-// Volunteer sign-up. Same validation rules as the CSC 106 /api/volunteer endpoint;
-// the database repeats these checks (supabase/schema.sql) so they can't be bypassed.
+// Edit capacity, contact details and manual status override per center.
+// Occupancy is never typed in: it is counted from registered evacuees.
 import { useState } from "react";
-import { Field } from "../../components/ui.jsx";
-import { AVAILABILITY } from "../../config.js";
-import { api } from "../../services/api.js";
+import { Field, Meter, PageHeader, StatusPill } from "../../components/ui.jsx";
+import { STATUSES } from "../../config.js";
+import { useData } from "../../context/DataContext.jsx";
+import { fmt, formatDateTime } from "../../lib/status.js";
 
-const EMPTY = { fullName: "", contactNumber: "", email: "", availability: "", preferredCenter: "", skills: "", website: "" };
-
-export function validateVolunteer(v) {
-  const errors = {};
-  if (v.fullName.trim().length < 2) errors.fullName = "Please enter your full name.";
-  if (!/^(09|\+639)\d{9}$/.test(v.contactNumber.replace(/[\s-]/g, ""))) errors.contactNumber = "Use a PH mobile number, e.g. 09171234567.";
-  if (v.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) errors.email = "That email address doesn't look right.";
-  if (!AVAILABILITY.includes(v.availability)) errors.availability = "Please choose your availability.";
-  return errors;
-}
-
-export default function VolunteerForm({ centers }) {
-  const [values, setValues] = useState(EMPTY);
-  const [errors, setErrors] = useState({});
-  const [state, setState] = useState({ sending: false, message: "", ok: false });
+function CenterEditor({ center, onSave }) {
+  const [editing, setEditing] = useState(false);
+  const [values, setValues] = useState(center);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
   const set = (key) => (e) => setValues((v) => ({ ...v, [key]: e.target.value }));
 
-  async function onSubmit(e) {
+  async function save(e) {
     e.preventDefault();
-    // Honeypot: real visitors never see or fill the "website" field.
-    if (values.website) return;
-    const found = validateVolunteer(values);
-    setErrors(found);
-    if (Object.keys(found).length) return;
-
-    setState({ sending: true, message: "", ok: false });
+    // An empty box would become 0, which silently marks the center Closed.
+    if (String(values.capacity).trim() === "") return setError("Enter the capacity (0 closes the center).");
+    const capacity = Number(values.capacity);
+    if (!Number.isInteger(capacity) || capacity < 0) return setError("Capacity must be a whole number.");
+    setBusy(true);
+    setError("");
     try {
-      await api.addVolunteer({
-        fullName: values.fullName.trim().slice(0, 80),
-        contactNumber: values.contactNumber.replace(/[\s-]/g, ""),
-        email: values.email.trim().slice(0, 120),
-        availability: values.availability,
-        skills: values.skills.trim().slice(0, 300),
-        preferredCenter: values.preferredCenter,
+      await onSave(center.id, {
+        capacity,
+        statusOverride: values.statusOverride,
+        contactPerson: values.contactPerson.trim(),
+        contactNumber: values.contactNumber.trim(),
       });
-      setValues(EMPTY);
-      setState({ sending: false, ok: true, message: "Thank you! A barangay coordinator will contact you soon." });
+      setEditing(false);
     } catch (err) {
-      // P0001 = a message written for visitors in supabase/schema.sql (e.g. too many sign-ups).
-      const message = err.code === "P0001" ? err.message : "We couldn't save your sign-up right now. Please try again later.";
-      setState({ sending: false, ok: false, message });
+      setError(err.message);
+    } finally {
+      setBusy(false);
     }
   }
 
   return (
-    <form className="card space-y-4" onSubmit={onSubmit} noValidate>
-      <Field label="Full name" error={errors.fullName} htmlFor="v-name">
-        <input id="v-name" className="input" autoComplete="name" maxLength={80} value={values.fullName} onChange={set("fullName")} />
-      </Field>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Mobile number" error={errors.contactNumber} htmlFor="v-phone">
-          <input id="v-phone" className="input" type="tel" inputMode="tel" autoComplete="tel" placeholder="09XXXXXXXXX" maxLength={20} value={values.contactNumber} onChange={set("contactNumber")} />
-        </Field>
-        <Field label="Email" optional error={errors.email} htmlFor="v-email">
-          <input id="v-email" className="input" type="email" autoComplete="email" maxLength={120} value={values.email} onChange={set("email")} />
-        </Field>
+    <li className="card">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="font-bold">{center.name}</h2>
+          <p className="text-sm text-muted">{center.location} · {center.id}</p>
+        </div>
+        <StatusPill status={center.status} />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Availability" error={errors.availability} htmlFor="v-avail">
-          <select id="v-avail" className="input" value={values.availability} onChange={set("availability")}>
-            <option value="">Choose one</option>
-            {AVAILABILITY.map((a) => <option key={a}>{a}</option>)}
-          </select>
-        </Field>
-        <Field label="Preferred center" optional htmlFor="v-center">
-          <select id="v-center" className="input" value={values.preferredCenter} onChange={set("preferredCenter")}>
-            <option value="">Any center</option>
-            {centers.filter((c) => c.status !== "Closed").map((c) => <option key={c.id}>{c.name}</option>)}
-          </select>
-        </Field>
-      </div>
-      <Field label="Skills or experience" optional htmlFor="v-skills">
-        <textarea id="v-skills" className="input" rows={3} maxLength={300} placeholder="e.g. first aid, cooking, encoding, driving" value={values.skills} onChange={set("skills")} />
-      </Field>
-      <div className="hidden" aria-hidden="true">
-        <label htmlFor="v-website">Leave this empty</label>
-        <input id="v-website" tabIndex={-1} autoComplete="off" value={values.website} onChange={set("website")} />
-      </div>
-      <button className="btn-accent w-full" type="submit" disabled={state.sending}>
-        {state.sending ? "Sending…" : "Sign me up"}
-      </button>
-      {state.message && (
-        <p role="status" className={`text-sm font-semibold ${state.ok ? "text-open" : "text-full"}`}>
-          {state.message}
+      <div className="mt-3">
+        <Meter value={center.occupancy} max={center.capacity} status={center.status} />
+        <p className="mt-1 text-xs text-muted">
+          {fmt(center.occupancy)} sheltered of {fmt(center.capacity)} · {fmt(center.available)} spaces left
+          {center.statusOverride && <> · status set manually to <strong>{center.statusOverride}</strong></>}
         </p>
+      </div>
+
+      {editing ? (
+        <form className="mt-4 grid gap-3 border-t border-line pt-4 sm:grid-cols-2" onSubmit={save}>
+          <Field label="Capacity (persons)" htmlFor={`cap-${center.id}`}>
+            <input id={`cap-${center.id}`} className="input" type="number" min={0} value={values.capacity} onChange={set("capacity")} />
+          </Field>
+          <Field label="Status" htmlFor={`st-${center.id}`}>
+            <select id={`st-${center.id}`} className="input" value={values.statusOverride} onChange={set("statusOverride")}>
+              <option value="">Automatic (from occupancy)</option>
+              {STATUSES.map((s) => <option key={s} value={s}>Force: {s}</option>)}
+            </select>
+          </Field>
+          <Field label="Contact person" htmlFor={`cp-${center.id}`}>
+            <input id={`cp-${center.id}`} className="input" value={values.contactPerson} onChange={set("contactPerson")} />
+          </Field>
+          <Field label="Contact number" htmlFor={`cn-${center.id}`}>
+            <input id={`cn-${center.id}`} className="input" type="tel" value={values.contactNumber} onChange={set("contactNumber")} />
+          </Field>
+          {error && <p className="text-sm font-semibold text-full sm:col-span-2">{error}</p>}
+          <div className="flex justify-end gap-2 sm:col-span-2">
+            <button type="button" className="btn-ghost" onClick={() => { setValues(center); setEditing(false); }}>Cancel</button>
+            <button className="btn-primary" disabled={busy}>{busy ? "Saving…" : "Save"}</button>
+          </div>
+        </form>
+      ) : (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3 text-xs text-muted">
+          <span>
+            {center.contactPerson || "No contact person"} {center.contactNumber && `· ${center.contactNumber}`}
+            {center.updatedAt && ` · edited ${formatDateTime(center.updatedAt)}`}
+          </span>
+          <button className="btn-ghost px-3 py-1.5 text-xs" onClick={() => { setValues(center); setEditing(true); }}>Edit</button>
+        </div>
       )}
-    </form>
+    </li>
+  );
+}
+
+export default function Centers() {
+  const { centers, actions } = useData();
+  return (
+    <>
+      <PageHeader title="Evacuation centers" subtitle="Status is automatic: Nearly Full at 80%, Full at 100%. Override it to close a center." />
+      <ul className="grid gap-4 md:grid-cols-2">
+        {centers.map((c) => <CenterEditor key={c.id} center={c} onSave={actions.updateCenter} />)}
+      </ul>
+    </>
   );
 }
