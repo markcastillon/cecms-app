@@ -89,7 +89,7 @@ export default function Home() {
   return (
     <div className="min-h-svh">
       <OfflineBanner />
-      <header className="sticky top-0 z-10 border-b border-line bg-surface/95 backdrop-blur">
+      <header className="sticky top-[env(safe-area-inset-top)] z-10 border-b border-line bg-surface/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 md:px-8">
           <Brand />
           <nav className="flex items-center gap-1 text-sm font-semibold" aria-label="Main">
@@ -108,7 +108,7 @@ export default function Home() {
           <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2.5 text-sm md:px-8">
             <AlertTriangle size={18} className="shrink-0" aria-hidden="true" />
             <p className="min-w-0 flex-1 font-semibold">{urgent.title}</p>
-            <a href="#announcements" className="shrink-0 underline">Read more</a>
+            <a href="#announcements" className="tap inline-flex shrink-0 items-center underline">Read more</a>
           </div>
         </div>
       )}
@@ -130,8 +130,10 @@ export default function Home() {
               <a href="#volunteer" className="btn-ghost">Volunteer to help</a>
             </div>
             <p className="mt-5 flex items-center gap-2 text-sm text-muted">
-              <Phone size={14} aria-hidden="true" /> In a life-threatening emergency, call{" "}
-              <a href="tel:911" className="font-bold text-link">911</a>.
+              <Phone size={14} aria-hidden="true" />
+              <span>
+                In a life-threatening emergency, call <a href="tel:911" className="font-bold text-link">911</a>.
+              </span>
             </p>
           </div>
 
@@ -164,7 +166,7 @@ export default function Home() {
         </section>
 
         {/* Centers */}
-        <section id="centers" className="scroll-mt-20 border-t border-line py-12">
+        <section id="centers" className="scroll-mt-[calc(5rem_+_env(safe-area-inset-top))] border-t border-line py-12">
           <div className="mx-auto max-w-6xl px-4 md:px-8">
             <p className="eyebrow">Real-time capacity</p>
             <h2 className="mt-2 text-2xl font-extrabold md:text-3xl">Evacuation center status</h2>
@@ -220,7 +222,7 @@ export default function Home() {
         </section>
 
         {/* Announcements */}
-        <section id="announcements" className="scroll-mt-20 border-t border-line bg-tint py-12">
+        <section id="announcements" className="scroll-mt-[calc(5rem_+_env(safe-area-inset-top))] border-t border-line bg-tint py-12">
           <div className="mx-auto max-w-6xl px-4 md:px-8">
             <p className="eyebrow">From barangay officials</p>
             <h2 className="mt-2 text-2xl font-extrabold md:text-3xl">Emergency announcements</h2>
@@ -233,7 +235,7 @@ export default function Home() {
 
         {/* Policies */}
         {data?.policies.length > 0 && (
-          <section id="policies" className="scroll-mt-20 border-t border-line py-12">
+          <section id="policies" className="scroll-mt-[calc(5rem_+_env(safe-area-inset-top))] border-t border-line py-12">
             <div className="mx-auto max-w-6xl px-4 md:px-8">
               <p className="eyebrow">Barangay policies</p>
               <h2 className="mt-2 text-2xl font-extrabold md:text-3xl">Ordinance, policies &amp; center rules</h2>
@@ -245,7 +247,7 @@ export default function Home() {
         )}
 
         {/* Volunteer */}
-        <section id="volunteer" className="scroll-mt-20 border-t border-line bg-tint py-12">
+        <section id="volunteer" className="scroll-mt-[calc(5rem_+_env(safe-area-inset-top))] border-t border-line bg-tint py-12">
           <div className="mx-auto grid max-w-6xl gap-8 px-4 md:grid-cols-2 md:px-8">
             <div>
               <p className="eyebrow">Lend a hand</p>
