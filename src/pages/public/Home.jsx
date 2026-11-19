@@ -4,6 +4,7 @@ import { AlertTriangle, LogIn, Phone, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { Brand } from "../../components/Brand.jsx";
+import { InstallButton } from "../../components/InstallButton.jsx";
 import { AnnouncementCard, EmptyState, Meter, OfflineBanner, Spinner, StatusPill } from "../../components/ui.jsx";
 import { BARANGAY, CITY, STATUSES } from "../../config.js";
 import { usePublicStatus } from "../../hooks/usePublicStatus.js";
@@ -129,6 +130,7 @@ export default function Home() {
               <a href="#centers" className="btn-primary">See center status</a>
               <a href="#volunteer" className="btn-ghost">Volunteer to help</a>
             </div>
+            <InstallButton className="mt-3" />
             <p className="mt-5 flex items-center gap-2 text-sm text-muted">
               <Phone size={14} aria-hidden="true" />
               <span>
