@@ -13,6 +13,26 @@ export function ProtectedRoute({ children }) {
   if (loading) return <Spinner label="Checking your session…" />;
   if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
 
+  if (user.checkFailed) {
+    return (
+      <main className="mx-auto flex min-h-svh max-w-md flex-col items-center justify-center px-4 text-center">
+        <h1 className="text-xl font-extrabold">Couldn't check your account</h1>
+        <p className="mt-2 text-sm text-muted">
+          You're logged in as {user.email}, but we couldn't reach the server to confirm your access. Check your
+          connection and try again.
+        </p>
+        <div className="mt-6 flex gap-3">
+          <button className="btn-primary" onClick={() => window.location.reload()}>
+            Try again
+          </button>
+          <button className="btn-ghost" onClick={signOut}>
+            Log out
+          </button>
+        </div>
+      </main>
+    );
+  }
+
   if (!user.approved) {
     return (
       <main className="mx-auto flex min-h-svh max-w-md flex-col items-center justify-center px-4 text-center">
